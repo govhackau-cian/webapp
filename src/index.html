@@ -11,7 +11,7 @@
 
     <style type="text/css">
         #map { 
-            height: 300px;
+            height: 600px;
         }
    </style>
 </head>
@@ -24,6 +24,8 @@
 <p id="demo"></p>
 <div id="map"></div>
 
+
+<script src="data/sample2.geojson" type="text/javascript"></script>
 <script>
 var x = document.getElementById("demo");
 
@@ -42,14 +44,53 @@ function showPosition(position) {
 }
 
 function plotBasePosition(position) {
-    var mymap = L.map('map').setView([position.coords.latitude, position.coords.longitude], 13);
+    var map = L.map('map').setView([position.coords.latitude, position.coords.longitude], 16);
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
         maxZoom: 18,
         id: 'mapbox.streets',
         accessToken: 'pk.eyJ1IjoiZ292aGFja2F1LWNpYW4iLCJhIjoiY2o1b28zYm5pMDI1bzM4bzU3MjNjcmU4cSJ9._E6f7BTPsC3F5UBT8XzT8w'
-    }).addTo(mymap);
+    }).addTo(map);
+
+    function onEachFeature(feature, layer) {
+        var popupContent = "<p>I started out as a GeoJSON " +
+                feature.geometry.type + ", but now I'm a Leaflet vector!</p>";
+
+        if (feature.properties && feature.properties.DESC_) {
+            popupContent = feature.properties.DESC_;
+        }
+
+        layer.bindPopup(popupContent);
+    }
+
+    L.geoJSON([toilets], {
+
+        style: function (feature) {
+            return feature.properties && feature.properties.style;
+        },
+
+        onEachFeature: onEachFeature,
+
+        pointToLayer: function (feature, latlng) {
+            return L.circleMarker(latlng, {
+                radius: 8,
+                fillColor: "#ff7800",
+                color: "#000",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+            });
+        }
+    }).addTo(map);
+
+
+    //User's base location marker
+    var baseLocation = L.marker([position.coords.latitude, position.coords.longitude]).addTo(map);
+    baseLocation.bindPopup("<strong>YOU ARE HERE</strong>").openPopup();
+
 }
+
+getLocation();
 </script>
 
 </body>
