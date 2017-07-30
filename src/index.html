@@ -21,6 +21,14 @@
             min-height: 600px;
             height: 100vh;
             width: 100%;
+            margin-top: 10px;
+            display: block;
+        }
+
+        .leaflet-popup-content p {
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
         }
 
         .layer-popup img {
@@ -28,13 +36,45 @@
             height: 28px;
             width: : auto;
         }
+        #header {
+            padding-top: 15px;
+            padding-bottom: 15px;
+            display: block;
+        }
+        #logo {
+            height: 40px;
+            width: auto;
+            float: left;
+            margin-left: 15px;
+        }
+        #category-select {
+            height: 40px;
+            width: 200px;
+            float: right;
+            border: 1px solid #CCC;
+            padding: 8px;
+            margin-right: 15px;
+        }
+        .row::before, .row::after {
+            display: table;
+            content: " ";
+        }
+
+        .row::after {
+            clear: both;
+        }
    </style>
 </head>
 <body>
-<select id="category-select">
-    <option value="publictoilets">Public Toilets</option>
-    <option value="playgrounds">Playgrounds</option>
-</select>
+<div id="header" class="row">
+    <img src="icons/logo.png" id="logo" />
+    <select id="category-select">
+        <option selected=selected value="">Select Facility</option>
+        <option value="publictoilets">Public Toilets</option>
+        <option value="playgrounds">Playgrounds</option>
+        <option value="parks">Parks</option>
+    </select>
+</div>
 <div id="map"></div>
 <script>
     var x = document.getElementById("demo");
@@ -63,11 +103,18 @@
         iconUrl: 'icons/playequipment.png'
     });
 
+    var parkIcon = new L.Icon({
+        iconSize: [32, 32],
+        iconAnchor: [13, 27],
+        popupAnchor:  [1, -24],
+        iconUrl: 'icons/parks.png'
+    });
+
     function onEachFeature(feature, layer) {
         var popupContent = "";
 
         if (feature.properties && feature.properties.DESC_) {
-            popupContent = feature.properties.DESC_;
+            popupContent = '<p>'+feature.properties.DESC_+'</p>';
         }
 
         if(feature.properties.ICONS_) {
@@ -117,6 +164,9 @@
                     if(feature.properties.TYPE_ == 'PublicToilet') {
                         return L.marker(latlng, {icon: toiletIcon});
                     }
+                    if(feature.properties.TYPE_ == 'Park') {
+                        return L.marker(latlng, {icon: parkIcon});
+                    }
                 },
             });
             dataLayer.addTo(map);
@@ -129,6 +179,9 @@
             case 'playgrounds':
                 $.getJSON("http://www.karpur.com/PlayGrounds.geojson", function(data) { addDataToMap(data, map); });
                 break;
+            case 'parks':
+                $.getJSON("http://www.karpur.com/ParksGrounds.geojson", function(data) { addDataToMap(data, map); });
+                break;
             default:
                 $.getJSON("http://www.karpur.com/GetToilets.geojson", function(data) { addDataToMap(data, map); });
         }
@@ -139,7 +192,6 @@ getLocation();
 <script type="text/javascript">
     $('#category-select').on('change', function() {
       updateMap(map, this.value);
-      console.log(this.value);
     })
 </script>
 
