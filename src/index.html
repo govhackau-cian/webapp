@@ -31,13 +31,15 @@
    </style>
 </head>
 <body>
+<select id="category-select">
+    <option value="publictoilets">Public Toilets</option>
+    <option value="playgrounds">Playgrounds</option>
+</select>
 <div id="map"></div>
-<!-- <script src="data/sample2.geojson" type="text/javascript"></script> -->
 <script>
     var x = document.getElementById("demo");
     var map;
-    var markers = [];
-    var dataLayer = new L.LayerGroup(); // NOTE: Layer is created here!
+    var dataLayer = new L.LayerGroup();
 
     function getLocation() {
         if (navigator.geolocation) {
@@ -92,7 +94,7 @@
     }
 
     function setupMap(position) {
-        var map = L.map('map').setView([position.coords.latitude, position.coords.longitude], 16);
+        var map = L.map('map').setView([position.coords.latitude, position.coords.longitude], 14);
         L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
             attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
             maxZoom: 18,
@@ -120,10 +122,25 @@
             dataLayer.addTo(map);
         }
 
-        $.getJSON("http://www.karpur.com/PlayGrounds.geojson", function(data) { addDataToMap(data, map); });
+        switch(activeLayer) {
+            case 'publictoilets':
+                $.getJSON("http://www.karpur.com/GetToilets.geojson", function(data) { addDataToMap(data, map); });
+                break;
+            case 'playgrounds':
+                $.getJSON("http://www.karpur.com/PlayGrounds.geojson", function(data) { addDataToMap(data, map); });
+                break;
+            default:
+                $.getJSON("http://www.karpur.com/GetToilets.geojson", function(data) { addDataToMap(data, map); });
+        }
     }
 
 getLocation();
+</script>
+<script type="text/javascript">
+    $('#category-select').on('change', function() {
+      updateMap(map, this.value);
+      console.log(this.value);
+    })
 </script>
 
 </body>
